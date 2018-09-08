@@ -1,0 +1,50 @@
+{
+  "name": "fsgod",
+  "version": "1.7.8",
+  "description": "Dynamic file system operations locally or across networks",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test1": "node tests/test1.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:gorbin5/fsgod-src.git"
+  },
+  "author": "Wesley Young",
+  "license": "ISC",
+  "dependencies": {
+    "child_process": "^1.0.2",
+    "eslint": "^4.19.0",
+    "net-ping": "^1.2.1",
+    "node-rsa": "^0.4.2",
+    "node-ssh": "^5.1.1",
+    "path": "^0.12.7",
+    "uuid": "^3.2.1"
+  },
+  "keywords": [
+    "directories",
+    "directory",
+    "file",
+    "files",
+    "folders",
+    "file managment",
+    "file system",
+    "folder managment",
+    "ssh2",
+    "remote file system operations",
+    "file conversion",
+    ".conf to .json",
+    ".json to .conf",
+    "download",
+    "upload",
+    "network",
+    "local network",
+    "networking",
+    "local networking",
+    "document managment",
+    "document",
+    "sftp",
+    "ftp"
+  ]
+}

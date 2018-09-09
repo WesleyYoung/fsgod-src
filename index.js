@@ -27,5 +27,4 @@
 
     //Remote Operations Service
     exports.Remop = ros.Remop;
-
 })();

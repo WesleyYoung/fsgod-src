@@ -347,14 +347,47 @@
 
       function isItemFileOrDir($path, $cb){
         ro.ssh.execCommand(`[ -d ${$path} ] && echo "OK" || echo "False"`).then(res => {
-          if (res.stderr){ throw res.stderr; }
-          else if(res.stdout == "OK"){ $cb("Dir"); }
+          if (res.stderr) throw res.stderr;
+          if(res.stdout == "OK"){ $cb("Dir"); }
           else {
             ro.ssh.execCommand(`[ -f ${$path} ] && echo "OK" || echo "False"`).then(res => {
               if (res.stderr){ throw res.stderr; }
               else if(res.stdout == "OK"){ $cb("File"); }
               else { $cb("Unkown"); }
             });
+          }
+        });
+      }
+
+      ro.getFileStat = ($path, $cb) => {
+        ro.ssh.execCommand(`stat ${$path}`).then(res => {
+          if (res.stderr) $cb(res.stderr, null);
+          else {
+            var split_up = res.stdout.split(/[\r\n]/),
+            stat = {
+              file: split_up[0].split(': ')[1],
+              access: split_up[4].split(': ')[1],
+              modify: split_up[5].split(': ')[1],
+              change: split_up[6].split(': ')[1],
+              birth: split_up[7].split(': ')[1]
+            },
+            size_split = split_up[1].split('  ');
+            size_split = size_split.filter(item => {
+              return item !== ' ' && item !== '';
+            });
+            size_split = size_split.map((item) => {
+              if (item[0] == ' '){
+                return item.substr(1, item.length - 1);
+              } else if (/[\t]/ig.test(item.substr(0, 2))) {
+                  return item.substr(1, item.length);
+              }
+              else return item;
+            });
+            stat.size = size_split[0].split(': ')[1];
+            stat.blocks = size_split[1].split(': ')[1];
+            stat.io_blocks = size_split[2].split(': ')[1];
+            stat.type = size_split[3];
+            $cb(null, stat);
           }
         });
       }
@@ -374,7 +407,13 @@
                     fs_obj.directories.push({ name: $item });
                   }
                   else if (type == "File"){
-                    fs_obj.files.push({name: $item})
+                    ro.getFileStat(fs_obj.location + '/' + $item, (err, stat) => {
+                      if (err) throw err;
+                      fs_obj.files.push({
+                        name: $item,
+                        properties: stat
+                      })
+                    });
                   }
                   if (counter < contents.length) { addItem(contents[counter]); }
                   else { $cb(null, fs_obj) }

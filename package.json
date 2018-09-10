@@ -1,6 +1,6 @@
 {
   "name": "fsgod",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "description": "Dynamic file system operations locally or across networks",
   "main": "index.js",
   "scripts": {
@@ -20,6 +20,8 @@
     "node-rsa": "^0.4.2",
     "node-ssh": "^5.1.1",
     "path": "^0.12.7",
+    "raw-socket": "^1.6.2",
+    "pcap2": "^3.0.4",
     "uuid": "^3.2.1"
   },
   "keywords": [

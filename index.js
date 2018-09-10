@@ -5,7 +5,8 @@
         vdos = require('./services/virtual-directory-object-service'),
         rados = require('./services/random-access-directory-object-service'),
         ros = require('./services/remote-operations-service'),
-        bos = require('./services/basic-operations-service');
+        bos = require('./services/basic-operations-service'),
+        nos = require('./services/network-operations-service');
 
     // Virtual Directory Object Service
     exports.VirtualDirectoryTree = vdos.VirtualDirectoryTree;
@@ -27,4 +28,7 @@
 
     //Remote Operations Service
     exports.Remop = ros.Remop;
+
+    //Network Operations service
+    exports.Netops = nos.Netops;
 })();

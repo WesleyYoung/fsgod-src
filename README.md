@@ -11,17 +11,17 @@ const fsgod = require('fsgod');
 
 ## Components
 
-# Remop
+# Remote Operations (Remop)
 
-Remote Operations (Remop) uses [node-ssh](https://www.npmjs.com/package/node-ssh "node-ssh") to handle multiple connections over ssh2
+Remop uses [node-ssh](https://www.npmjs.com/package/node-ssh "node-ssh") to facilitate connections over ssh2
 
-NOTE: At the moment, only linux/unix based systems are fully supported. Remop can connect to Windows systems but it won't be able to determine OS or manage packages
+NOTE: At the moment, only Linux based operating systems can be remotely operated and monitored.
+
+NOTE: As of now, Remote-Operations does not support RSA keys.
 
 ### connect
 
 When the connect function is called, it adds the connection into the remop.connections object where it can be accessed with other connections
-
-NOTE: As of now, Remop doesn't support rsa keys, but it's being worked on.
 
 ```javascript
 const fsgod = require('fsgod');
@@ -39,7 +39,7 @@ remop.connect({
 
 ### ssh
 
-The ssh method exposes the [node-ssh](https://www.npmjs.com/package/node-ssh "node-ssh") API and all of it's functionality can be accessed like so:
+The ssh method exposes the [node-ssh](https://www.npmjs.com/package/node-ssh "node-ssh") API and all of it's functionality can be accessed via the 'ssh' property like so:
 
 ```javascript
 remop.connect({
@@ -228,11 +228,13 @@ myConnection.grabConf2JSON(path, (err, json) => {
   json.myNextValue = 'updatedMyNextValue!';
   myConnection.writeJSON2Conf(path, json, (err) => {
     if (err) throw err;
-    myConnection.grabConf2JSON(path, (err, newJson) => {
-      if (err) throw err;
-      console.log(newJson);
-      // { myValue: 'updatedMyValue!', myOtherValue: 'updateMyOtherValue!', myNextValue: 'updatedMyNextValue!' }
-    });
+    /*
+    home/pi/test.conf
+
+    myValue updatedMyValue!
+    myOtherValue updateMyOtherValue!
+    myNextValue updatedMyNextValue!
+    */
   });
 });
 ```
@@ -244,16 +246,14 @@ Simple file and Directory checking function. In the callback, the second argumen
 ```javascript
 var myConnection = remop.get('pi@192.168.X.X')
 
-myConnection.fileExists('pathToFile', (err, res) => {
+myConnection.fileExists('pathToFile', (err, exists) => {
   if (err) throw err;
-  if (res) action(); //res is a Boolean
-  else otherAction();
+  console.log(exists) // True or False
 });
 
-myConnection.dirExists('pathToDirectory', (err, res) => {
+myConnection.dirExists('pathToDirectory', (err, exists) => {
   if (err) throw err;
-  if (res) action(); //res is a Boolean
-  else otherAction();
+  console.log(exists) // True or False
 });
 ```
 
@@ -300,7 +300,7 @@ fsgod.mkfile('foo.txt', 'generic hello world text', (err) => {
 
 ### mkbase64
 
-mkbase64 is the mkfile function but specifies a base64 encoding for storing pictures
+mkbase64 is the mkfile function but specifies a base64 encoding
 
 ```javascript
 var base64String = '...';
@@ -383,7 +383,7 @@ fsgod.writeJSON('pathTo/data.json', json, (err) => {
 
 The VDT is a recursively created JavaScript object generated from a path you designate in your file system. The VDT makes it much easier to search, read, write, append, prepend, create, delete, and execute files, as well as other file system oriented tasks that would typically be repetitive and tricky to do dynamically and efficiently.
 
-NOTE: VDT is really for manipulating smallish size directories, larger directories will throw a stackoverflow error
+NOTE: VDT is really for manipulating small-ish size directories, larger directories will throw a stackoverflow error
 
 ```javascript
 const fsgod = require('fsgod');

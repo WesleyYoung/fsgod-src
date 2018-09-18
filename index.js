@@ -30,5 +30,5 @@
     exports.Remop = ros.Remop;
 
     //Network Operations service
-    exports.Netops = nos.Netops;
+    exports.NOS = nos;
 })();

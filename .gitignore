@@ -1,4 +1,4 @@
 # dependencies
 /node_modules
-./.gitignore
-./package-lock.json
+.gitignore
+package-lock.json

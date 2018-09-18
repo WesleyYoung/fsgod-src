@@ -11,6 +11,39 @@ const fsgod = require('fsgod');
 
 ## Components
 
+# Network Operations Service (NOS)
+
+Performs advanced network operations
+
+## Instantiate
+
+```javascript
+var nos = new fsgod.NOS;
+```
+
+### scan_localnet
+
+Uses ARP requests to locate devices on the same network as the device running the script. Returns the IP, Mac, and Mac Vendor (i.e. Microsoft, Sumsung Electronics ltd. etc.)
+
+```javascript
+nos.scan_localnet({
+  onResponse: (res) => {
+    console.log('Got response from ' + res.ip);
+  },
+  wait: 5000,
+  rangeStart: 1,
+  rangeEnd: 255
+}, data => {
+  console.log(data);
+});
+
+// or
+
+nos.scan_localnet(data => {
+  console.log(data);
+});
+```
+
 # Remote Operations (Remop)
 
 Remop uses [node-ssh](https://www.npmjs.com/package/node-ssh "node-ssh") to facilitate connections over ssh2
@@ -19,15 +52,17 @@ NOTE: At the moment, only Linux based operating systems can be remotely operated
 
 NOTE: As of now, Remote-Operations does not support RSA keys.
 
+## Instantiate
+
+```javascript
+var remop = new fsgod.Remop();
+```
+
 ### connect
 
 When the connect function is called, it adds the connection into the remop.connections object where it can be accessed with other connections
 
 ```javascript
-const fsgod = require('fsgod');
-
-var remop = new fsgod.Remop();
-
 remop.connect({
   host: '192.168.X.X',
   username: 'yourUsername',

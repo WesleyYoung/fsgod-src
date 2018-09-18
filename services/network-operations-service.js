@@ -9,7 +9,7 @@
     os = require('os'),
     pcap = require('pcap2'),
     bos = require('./basic-operations-service'),
-    MAC_VENDOR_DB = path.resolve('./services/__data/macs.json');
+    MAC_VENDOR_DB = path.join(__dirname, '__data', 'macs.json');
 
   exports.scan_localnet = scan_localnet;
 

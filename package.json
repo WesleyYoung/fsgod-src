@@ -1,6 +1,6 @@
 {
   "name": "fsgod",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Dynamic file system operations locally or across networks",
   "main": "index.js",
   "scripts": {

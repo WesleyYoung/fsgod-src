@@ -44,6 +44,16 @@ nos.scan_localnet(data => {
 });
 ```
 
+### ping
+
+Uses an ARP request to ping a specific host. Works like **scan-localnet** and returns the same data, except **ping** includes a status variable for determining if that host is online or not. The first argument *must* be a valid IPv4 address.
+
+```javascript
+nos.ping('192.168.1.1', (res) => {
+  console.log(res); // { ip: 192.168.1.1, mac: 00:0f:ff:0f:0f:ff, vendor: 'Luxul', status: 'online' }
+});
+```
+
 # Remote Operations (Remop)
 
 Remop uses [node-ssh](https://www.npmjs.com/package/node-ssh "node-ssh") to facilitate connections over ssh2

@@ -12,6 +12,7 @@
     MAC_VENDOR_DB = path.join(__dirname, '__data', 'macs.json');
 
   exports.scan_localnet = scan_localnet;
+  exports.ping = ping;
 
   function scan_localnet($opts, $done) {
 
@@ -38,28 +39,11 @@
       sl = this,
   		my_subnet = ip.address().split('.').splice(0, 3).join('.'),
   		local_net_addrs = [],
-  		iface = null,
-  		iface_name = '',
-  		ifaces = os.networkInterfaces(),
-      responses = [];
-
-  	for (var face in ifaces) {
-  		for (var i = 0; i < ifaces[face].length; i++) {
-  			if (ifaces[face][i].family == "IPv4"){
-  				if (!ifaces[face][i].internal){
-  					iface = ifaces[face][i];
-  					break;
-  				}
-  			}
-  		}
-  		if (iface !== null) {
-  			iface_name = face;
-  			break;
-  		}
-  	}
-  	if (iface == null) throw "No interface available";
-
-  	var session = new pcap.Session(iface_name, { filter: "arp" });
+      active_iface = get_active_iface(),
+  		iface = active_iface.iface,
+  		iface_name = active_iface.name,
+      responses = [],
+      session = new pcap.Session(iface_name, { filter: "arp" });
 
   	for (var i = $opts.rangeStart; i < $opts.rangeEnd; i++) {
   		local_net_addrs.push(my_subnet + '.' + i);
@@ -74,7 +58,7 @@
   				session.inject(packets[i]);
   			}
 
-  			session.on("packet", (raw) => {
+  			session.on('packet', (raw) => {
 
   				var
             response = pcap.decode.packet(raw),
@@ -95,11 +79,52 @@
   	});
   }
 
-  function build_packets(addrs, $iface, $done){
+  function ping($addr, $done) {
+    if ((/(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)/gi).test($addr)){
+
+      var
+        active_iface = get_active_iface(),
+        iface = active_iface.iface,
+        session = new pcap.Session(active_iface.name, { filter: 'arp' }),
+        packet = arp_request_packet($addr, iface),
+        alive = false;
+
+      bos.grabJSON(MAC_VENDOR_DB, (err, macs) => {
+        if (err) throw err;
+        session.inject(packet);
+        session.on('packet', (raw) => {
+          var response = pcap.decode.packet(raw);
+          if (response.payload.payload.sender_pa.toString() == $addr && !alive) {
+            alive = true;
+            $done({
+              status: 'online',
+              mac: response.payload.payload.sender_ha.toString(),
+              vendor: macs[response.payload.payload.sender_ha.toString().replace(/[\:]/gi, '').substr(0, 6).toUpperCase() || 'Unkown Vendor'],
+              ip: response.payload.payload.sender_pa.toString()
+            });
+          }
+        });
+        setTimeout(() => {
+          if(!alive) {
+            $done({
+              status: 'offline',
+              mac: '00:00:00:00:00:00',
+              vendor: 'n/a',
+              ip: $addr
+            })
+          }
+        }, 3000);
+      });
+    } else {
+      throw new Error('First argument MUST be a valid IPv4 address!');
+    }
+  }
+
+  function build_packets($addrs, $iface, $done){
 
   	var packets = [];
-  	for (var i = 0; i < addrs.length; i++) {
-  		packets.push(arp_request_packet(addrs[i], $iface));
+  	for (var i = 0; i < $addrs.length; i++) {
+  		packets.push(arp_request_packet($addrs[i], $iface));
   	}
   	$done(packets);
   };
@@ -121,6 +146,29 @@
 
   	return buffer;
   };
+
+  var get_active_iface = ($done) => {
+    var
+      ifaces = os.networkInterfaces(),
+      iface = null,
+      iface_name = '';
+    for (var face in ifaces) {
+  		for (var i = 0; i < ifaces[face].length; i++) {
+  			if (ifaces[face][i].family == "IPv4"){
+  				if (!ifaces[face][i].internal){
+  					iface = ifaces[face][i];
+  					break;
+  				}
+  			}
+  		}
+  		if (iface !== null) {
+  			iface_name = face;
+  			break;
+  		}
+  	}
+  	if (iface == null) throw "No currently active network interfaces";
+    else return { iface: iface, name: iface_name};
+  }
 
   var mac_to_bytes = ($mac) => {
   	var
